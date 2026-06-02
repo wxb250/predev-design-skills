@@ -1,0 +1,4 @@
+interface:
+  display_name: "Development Playbook Writer"
+  short_description: "Turn source docs into a reusable dev playbook."
+  default_prompt: "Use $development-playbook-writer to turn these materials into a practical pre-development handbook."

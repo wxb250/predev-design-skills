@@ -35,6 +35,18 @@ Use these section templates to keep design outputs stable across projects.
 7. Tradeoffs and recommended approach
 8. Open questions
 
+## Development Playbook Package
+
+1. Purpose and audience
+2. Source materials used
+3. Scope and expected outcome
+4. Global prerequisites and environment
+5. Phase map or task sequence
+6. Task catalog
+7. Acceptance and evidence expectations
+8. Optional extension or production path
+9. Risks and open questions
+
 ## Output Rules
 
 - Separate facts from inferences.

@@ -7,12 +7,14 @@ Reusable Codex skills for turning business and technical source materials into b
 - `design-from-materials`: turn mixed project materials into a normalized pre-development design package
 - `api-contract-designer`: turn requirements and examples into explicit API contracts
 - `domain-solution-designer`: shape domain models and backend solution drafts before coding
+- `development-playbook-writer`: turn design materials into a staged development handbook with prerequisites, task cards, acceptance checks, and evidence requirements
 
 ## Repository Structure
 
 - `design-from-materials/`
 - `api-contract-designer/`
 - `domain-solution-designer/`
+- `development-playbook-writer/`
 - `references/`: shared output templates and source-reading heuristics
 
 ## Install Locally
