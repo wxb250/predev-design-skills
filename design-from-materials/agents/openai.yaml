@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design From Materials"
+  short_description: "Turn source docs into a pre-dev design package."
+  default_prompt: "Use $design-from-materials to turn these materials into a build-ready backend design draft."

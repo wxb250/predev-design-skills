@@ -1,0 +1,4 @@
+interface:
+  display_name: "Domain Solution Designer"
+  short_description: "Draft domain models and backend solution shapes."
+  default_prompt: "Use $domain-solution-designer to shape the domain model and technical solution for this feature."

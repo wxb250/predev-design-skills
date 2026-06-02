@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Contract Designer"
+  short_description: "Design endpoint contracts from requirements and examples."
+  default_prompt: "Use $api-contract-designer to draft endpoint contracts from these requirements and examples."
