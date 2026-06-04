@@ -87,6 +87,14 @@ After producing the normalized draft:
 - Preserve the naming already established by the project materials.
 - Stay framework-neutral unless the user or sources require a specific stack.
 - Call out missing information early.
+- For long Markdown artifacts, optimize for readability before completeness:
+  - start with a short `How to Read This Document` section when the file is longer than a few screens
+  - add a `Summary` or `Design Overview` section before dense detail
+  - group dense facts into short bullet lists or compact tables instead of long paragraphs
+  - keep paragraphs short, usually 2 to 4 lines in common desktop Markdown readers
+  - add quick navigation cues such as recommended reading order or section purpose
+  - avoid opening with only metadata; tell the reader what changed and why it matters first
+  - use tables selectively; if a table becomes hard to scan, split it into bullets by theme
 
 ## Quick Checklist
 

@@ -100,6 +100,13 @@ The minimum output should cover:
 - Keep the handbook technology-aware but not stack-locked unless the materials require it.
 - Leave missing assets, contradictions, or hidden assumptions visible.
 - Stop short of file-by-file coding steps unless the user explicitly asks for a full implementation plan.
+- For long Markdown handbooks, design for fast reading:
+  - begin with `How to Read`, `Quick Start`, or `Playbook Summary` before detailed phases
+  - provide recommended reading order for different audiences when the document serves multiple roles
+  - keep paragraphs short and convert dense procedure blocks into bullets or numbered steps
+  - add quick-reference sections for common commands, paths, accounts, or decision points
+  - avoid front-loading the file with metadata only; explain the practical value of the document first
+  - prefer multiple compact sections over a few oversized sections
 
 ## Quick Checklist
 

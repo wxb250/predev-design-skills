@@ -93,6 +93,13 @@ The minimum output should cover:
 - Do not output OpenAPI unless the user asks for it.
 - Do not assume REST purity matters more than project consistency.
 - Keep the main artifact contract-first, not client-example-first.
+- Keep long contract documents easy to scan in Markdown readers:
+  - add a short overview or endpoint map before detailed sections
+  - group endpoints by resource or workflow, not by arbitrary numbering alone
+  - use short explanatory lead-ins before dense tables
+  - keep paragraphs short and avoid large uninterrupted walls of field definitions
+  - add quick-locate hints for common caller paths such as auth, learner flow, admin flow, or internal APIs
+  - when many shared structures exist, include a compact "most important updates" summary near the top
 
 ## Quick Checklist
 
