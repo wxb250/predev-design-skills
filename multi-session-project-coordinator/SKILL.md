@@ -1,43 +1,52 @@
 ---
 name: multi-session-project-coordinator
-description: Use when coordinating multiple existing Codex threads or sessions, or when planning a project that may need long-lived multi-session collaboration, round dispatch, cross-checks, blockers, or automation management.
+description: Use when coordinating multiple existing Codex threads or sessions, or when planning, creating, supervising, polling, or integrating long-lived Codex worker sessions across project worktrees, rounds, approvals, blockers, and safety boundaries.
 ---
 
 # Multi-Session Project Coordinator
 
 ## Overview
 
-Use this skill to act as a main coordinator for several already-running Codex sessions that share one project but own different domains. The coordinator does not replace domain workers; it reads their state, checks their outputs, manages round boundaries, and decides whether to dispatch, pause, or escalate.
+Use this skill to act as the coordinator for several Codex sessions that share one project but own different scopes. The coordinator does not replace workers; it verifies their isolation, reads their state, checks outputs, manages round boundaries, and decides whether to dispatch, pause, integrate, or escalate.
 
-This skill complements `dispatching-parallel-agents`: use that skill for creating independent worker tasks; use this one for supervising existing long-lived threads across rounds.
+This skill complements `dispatching-parallel-agents`: use that skill to create independent workers; use this one to supervise long-lived worker threads across rounds.
 
 ## When To Use
 
 Use when the user provides or implies:
 
-- A Plan mode project design or implementation planning request that may benefit from multiple long-lived sessions.
-- Multiple Codex thread/session IDs.
+- Multiple Codex thread/session IDs or a request to create them.
 - Role boundaries such as A/B/C ownership.
-- A shared output directory.
-- Recurring coordination, heartbeats, or status polling.
-- Cross-checks before the next round.
-- Safety boundaries or blocker gates.
+- Independent worktrees or a need for data isolation.
+- A shared output root, dispatch documents, or round-based delivery.
+- Heartbeats, recurring polling, blockers, or cross-checks.
 
 Do not use for a single-thread task, one-off code review, or ordinary subagent execution inside the current session.
 
 ## Plan Mode Decision Gate
 
-When in Plan mode, invoke this skill before writing the detailed plan if the work appears to have two or more independent domains, such as frontend/backend/payment/deployment, research/design/implementation, or multiple worktrees.
+When in Plan mode, invoke this skill before writing a detailed plan if the work has two or more independent domains.
 
-Before creating worker threads or dispatch documents, ask the user whether to use multi-session coordinated development. Keep the question short:
+Before creating worker threads or dispatch documents, ask:
 
 ```text
 这个任务可以拆成多个长期会话协同推进。是否启用多会话协同模式？
 ```
 
-If Plan mode provides a structured user-input tool, use it for this one decision. Recommend multi-session coordination only when it reduces conflict or speeds independent work; otherwise recommend single-session execution.
+If the user declines, proceed with single-session planning and do not create workers.
 
-If the user chooses multi-session coordination, continue with the setup checklist below. If the user declines, proceed with the normal single-session planning workflow and do not create worker threads.
+## Worker Creation Preflight
+
+Before creating or forking workers, verify the project target. Do not trust a saved project name alone.
+
+1. Resolve the intended repository root from the user's path, the current thread cwd, or an existing known-good project thread.
+2. Run non-destructive checks in that exact directory: `git -C <path> rev-parse --show-toplevel` and `git -C <path> status --short`.
+3. If a saved project points at a non-git directory or the wrong repository, do not create workers from it. Fork a known-good thread that is already attached to the real repository, or ask the user for the correct project target.
+4. Prefer detached worktrees for concurrent code work unless the user explicitly requests shared-local execution.
+5. If worktree creation returns only a pending id, wait until the actual child thread exists before dispatching.
+6. After creation, read each worker thread and verify its cwd and git status before sending scoped work.
+
+Never put two workers in the same checkout for overlapping code changes.
 
 ## Required Setup
 
@@ -46,10 +55,25 @@ Before coordinating, identify:
 - Worker sessions: ID, label, role, worktree/path, expected output files.
 - Shared output root: all coordinator and worker artifacts must go there.
 - Round number and current dispatch document.
-- Hard boundaries: actions that must stop automation and require user confirmation.
+- Hard boundaries: actions that stop automation and require user confirmation.
 - Resume condition: what evidence is required before dispatching the next round.
+- Approval posture: whether the user granted automatic non-destructive execution, and which operations still require human confirmation.
 
 If any of these are missing, infer conservatively from local files and thread history; ask the user only when a wrong assumption could cause unsafe work.
+
+## Approval Handling
+
+Thread tools may not expose approval or sandbox settings. When `create_thread` or `fork_thread` has no approval-policy field, do not claim tool-level auto-approval was configured.
+
+Instead, put the user's approval posture in every worker dispatch:
+
+```text
+Approval posture: The user authorized automatic execution for routine, non-destructive reads, edits, builds, tests, and local worktree writes in this delegated thread. Do not ask for confirmation for those normal actions. Stop and ask only for destructive git/filesystem operations, production deployment, real secrets or paid external calls, cross-worker scope changes, or changes outside the assigned worktree.
+```
+
+If the app or tool schema later exposes an explicit approval-policy parameter, prefer the real tool setting and still include the written approval posture for clarity. If a worker is still blocked by approval prompts, send a narrowly scoped follow-up that repeats the approval posture instead of broadening the task.
+
+Do not edit Codex internal state files to force approval policy changes. Treat app state as diagnostic evidence only. Real approval changes must come from the app UI, supported tool parameters, or an explicit user-approved configuration change.
 
 ## Coordination Loop
 
@@ -64,7 +88,7 @@ If any of these are missing, infer conservatively from local files and thread hi
    - unsafe claims or actions
    - conflicts between worker outputs
 6. If safe and actionable, generate:
-   - `ROUND_N_...CROSS_CHECK_AND_NEXT_PLAN.md`
+   - `ROUND_N_<topic>_CROSS_CHECK_AND_NEXT_PLAN.md`
    - `DEVELOPMENT_ROUND_(N+1)_DISPATCH.md`
 7. Send each worker only its own scoped task, with inputs, forbidden areas, validation commands, and exact output path.
 8. If work cannot continue without user input, generate the input checklist and pause dispatch.
@@ -79,6 +103,7 @@ Stop automatic advancement and write a risk or blocker report if any worker:
 - proposes or performs destructive git operations
 - creates overwrite or merge conflicts
 - reaches a user/environment gate that cannot be solved locally
+- leaks or requests secrets, tokens, raw prompts, production payloads, or paid external calls outside the approved scope
 
 Also stop on domain-specific hard boundaries supplied by the user.
 
@@ -99,46 +124,39 @@ For API relay, billing, payment, or production-like systems, default to these bo
 
 Use the user's project-specific boundary wording in generated dispatches.
 
-## Output Pattern
-
-Keep coordinator files predictable:
-
-```text
-ROUND_N_<topic>_CROSS_CHECK_AND_NEXT_PLAN.md
-DEVELOPMENT_ROUND_(N+1)_DISPATCH.md
-USER_<topic>_INPUT_REQUIRED.md
-AUTOMATION_<id>_HEARTBEAT_<timestamp>_STATUS.md
-AUTOMATION_<id>_..._PAUSED_OR_DELETED.md
-RISK_REPORT_<timestamp>.md
-```
-
-For worker outputs, preserve the user's naming pattern:
-
-```text
-SESSION_A_ROUND_N_<topic>.md
-SESSION_B_ROUND_N_<topic>.md
-SESSION_C_ROUND_N_<topic>.md
-```
-
 ## Dispatch Prompt Pattern
 
 Each worker prompt should include:
 
 - source coordinator thread ID, if available
-- files to read
+- worker label, role, and exact scope
 - worker-specific worktree/path
-- exact section of the dispatch document to execute
-- round goal
-- forbidden areas
+- files to read before designing
+- preflight commands: confirm cwd, run `git status --short`, and report unexpected dirty files
+- approval posture and stop gates
+- forbidden areas and data-safety rules
 - required validation commands
-- final output path
+- final output path or final response requirements
 
 Never ask a worker to perform another worker's scope. Never ask active workers for new work before the current round completes.
+
+Use this preflight block in every code worker dispatch:
+
+```text
+First do:
+1. Confirm cwd equals the assigned worktree.
+2. Run `git status --short`.
+3. Report any unexpected dirty files before editing.
+4. Keep all writes inside the assigned worktree unless explicitly told otherwise.
+```
 
 ## Automation Handling
 
 For heartbeat automations:
 
+- Inspect existing automations before creating a new heartbeat; update a matching heartbeat instead of creating duplicates.
+- Include worker thread IDs, labels, worktree paths, current round, stop gates, and latest integration rule in the automation prompt.
+- Keep the heartbeat attached to the coordinator thread when the user wants the same conversation to continue managing the project.
 - Keep notifications quiet while no user action is needed.
 - Notify only when advancing a round, hitting a blocker, needing user input, or stopping automation.
 - If automation would keep polling a known user-input blocker, pause or delete it and explain how to resume.
@@ -154,11 +172,25 @@ When the user provides environment details or other blockers:
 4. Dispatch only the workers whose scopes can make progress.
 5. Keep unavailable scopes marked `pending`; do not coerce them into `pass`.
 
+## Integration Gate
+
+Before integrating worker changes into the main checkout:
+
+1. Confirm every worker thread is complete, not merely that files exist on disk.
+2. Read each worktree's `git status --short` and diff.
+3. Check overlap by file path and domain boundary.
+4. Protect the main checkout's dirty worktree; do not overwrite or revert user changes.
+5. Run targeted tests first, then broader regression if the changes touch shared contracts.
+6. Only commit or push after the integrated tree is verified and the user asked for that step.
+
 ## Common Mistakes
 
 - Dispatching the next round while one worker is still `inProgress`.
 - Treating a file appearing on disk as completion when the worker thread has not finished.
+- Creating workers from an unverified saved project that points to a non-git or wrong directory.
+- Assuming `create_thread` configured auto-approval when the tool schema has no approval field.
+- Sending work before verifying the child thread's actual cwd and git status.
 - Continuing automation after the project is blocked on user-provided environment inputs.
 - Letting a worker broaden its role because another worker is idle.
-- Writing “passed” for evidence that is only a command template or pending prerequisite.
+- Writing "passed" for evidence that is only a command template or pending prerequisite.
 - Embedding project-specific thread IDs inside reusable instructions.
