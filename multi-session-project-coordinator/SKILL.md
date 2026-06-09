@@ -1,6 +1,6 @@
 ---
 name: multi-session-project-coordinator
-description: Use when coordinating multiple existing Codex threads or sessions, or when planning, creating, supervising, polling, or integrating long-lived Codex worker sessions across project worktrees, rounds, approvals, blockers, and safety boundaries.
+description: Use when coordinating multiple existing Codex threads or sessions, or when evaluating a completed development plan to decide whether workload, domain boundaries, risk, or duration justify multi-session division of labor; also use when planning, creating, supervising, polling, or integrating long-lived Codex worker sessions across project worktrees, rounds, approvals, blockers, and safety boundaries.
 ---
 
 # Multi-Session Project Coordinator
@@ -25,15 +25,22 @@ Do not use for a single-thread task, one-off code review, or ordinary subagent e
 
 ## Plan Mode Decision Gate
 
-When in Plan mode, invoke this skill before writing a detailed plan if the work has two or more independent domains.
+When in Plan mode, invoke this skill before finalizing a detailed plan if the work may have two or more independent domains. Do not create worker threads or dispatch documents before the development plan exists and the user confirms the collaboration mode.
 
-Before creating worker threads or dispatch documents, ask:
+After the development plan is drafted, evaluate whether multi-session division of labor is warranted:
+
+- Prefer single-session execution when the plan is small, linear, low risk, or dominated by one module.
+- Recommend multi-session coordination when the plan has separable domains, long-running work, parallelizable research and implementation, separate frontend/backend/infrastructure tracks, independent worktrees, or review/integration risk.
+- State the recommendation and the reason in one short paragraph.
+- Ask the user to confirm whether to proceed with multi-session coordination before creating workers, dispatch files, automations, or worktrees.
+
+Use this confirmation prompt, adapting only the first sentence to the project:
 
 ```text
-这个任务可以拆成多个长期会话协同推进。是否启用多会话协同模式？
+我评估这个开发计划后，认为它可以拆成多个长期会话协同推进。是否启用多会话协同模式？
 ```
 
-If the user declines, proceed with single-session planning and do not create workers.
+If the user accepts, proceed with Worker Creation Preflight and dispatch according to the user's chosen division of labor. If the user declines, proceed with single-session execution and do not create workers.
 
 ## Worker Creation Preflight
 
