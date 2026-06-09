@@ -1,6 +1,0 @@
-interface:
-  display_name: "Multi-Session Project Coordinator"
-  short_description: "Evaluate development plans for multi-session division of labor, then coordinate workers if approved."
-  default_prompt: "Use $multi-session-project-coordinator after drafting the development plan to evaluate whether multi-session coordination is worthwhile, ask for user confirmation, then supervise worker threads if enabled."
-policy:
-  allow_implicit_invocation: true
