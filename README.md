@@ -8,7 +8,6 @@ Reusable Codex skills for turning business and technical source materials into b
 - `api-contract-designer`: turn requirements and examples into explicit API contracts
 - `domain-solution-designer`: shape domain models and backend solution drafts before coding
 - `development-playbook-writer`: turn design materials into a staged development handbook with prerequisites, task cards, acceptance checks, and evidence requirements
-- `multi-session-project-coordinator`: coordinate or propose long-running Codex worker sessions across project rounds
 
 ## Repository Structure
 
@@ -16,7 +15,6 @@ Reusable Codex skills for turning business and technical source materials into b
 - `api-contract-designer/`
 - `domain-solution-designer/`
 - `development-playbook-writer/`
-- `multi-session-project-coordinator/`
 - `references/`: shared output templates and source-reading heuristics
 
 ## Install Locally
